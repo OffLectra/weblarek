@@ -4,6 +4,8 @@ import { EventEmitter } from './components/base/Events';
 import { CatalogModel } from './components/models/CatalogModel';
 import { BasketModel } from './components/models/BasketModel';
 import { OrderModel } from './components/models/OrderModel';
+import { WebLarekAPI } from './components/communication/WebLarekAPI';
+import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
 import { IProduct } from './types';
 
@@ -12,6 +14,8 @@ const events = new EventEmitter();
 const catalog = new CatalogModel(events);
 const basket = new BasketModel(events);
 const order = new OrderModel(events);
+const api = new WebLarekAPI(API_URL);
+
 
 // ---CatalogModel---
 console.log('---CatalogModel---');
@@ -92,3 +96,15 @@ console.log('setOrderData (partial update):',
 // ---SUMMARY---
 console.log('\n---SUMMARY---');
 console.log('All tests completed.');
+
+// ---API Request---
+console.log('\n---API Request---');
+
+api.getProducts()
+    .then(data => {
+        catalog.setItems(data.items);
+        console.log('getProducts:', catalog.getItems().length === data.total ? 'OK' : 'FAIL');
+    })
+    .catch(error => {
+        console.error('getProducts:', error);
+    });
