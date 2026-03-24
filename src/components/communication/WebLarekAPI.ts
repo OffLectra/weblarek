@@ -4,9 +4,11 @@ import { IOrder, IOrderResult, IProductsResponse } from '../../types';
 /**
  * Класс для работы с API web larek
  */
-export class WebLarekAPI extends Api {
+export class WebLarekAPI {
+    private api: Api;
+
     constructor(baseUrl: string, options?: RequestInit) {
-        super(baseUrl, options);
+        this.api = new Api(baseUrl, options);
     }
 
     /**
@@ -14,7 +16,7 @@ export class WebLarekAPI extends Api {
      * @returns Promise с объектом, содержащим массив товаров и общее количество
      */
     getProducts(): Promise<IProductsResponse> {
-        return this.get('/product').then((data: unknown) => data as IProductsResponse);
+        return this.api.get<IProductsResponse>('/product');
     }
 
     /**
@@ -23,6 +25,6 @@ export class WebLarekAPI extends Api {
      * @returns Promise с результатом заказа (id и total)
      */
     postOrder(order: IOrder): Promise<IOrderResult> {
-        return this.post('/order', order).then((data: unknown) => data as IOrderResult);
+        return this.api.post<IOrderResult>('/order', order);
     }
 }

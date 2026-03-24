@@ -1,5 +1,4 @@
 import { IProduct } from '../../types';
-import { EventEmitter } from '../base/Events';
 
 /**
  * Модель каталога товаров
@@ -9,84 +8,38 @@ export class CatalogModel {
     protected _items: IProduct[] = [];
     protected _selectedProduct: IProduct | null = null;
 
-    constructor(protected events: EventEmitter) {}
-
     /**
-     * Полная замена каталога
-     * @param items - новый массив товаров
+     * Сохранить массив товаров
      */
     setItems(items: IProduct[]): void {
-        if (!Array.isArray(items)) {
-            console.warn('CatalogModel: попытка установить не массив в каталог');
-            return;
-        }
-        
-        // Создаем копию, чтобы избежать мутаций извне
-        this._items = [...items];
-        this.events.emit('catalog:changed', { items: this._items });
+        this._items = items;
     }
 
     /**
-     * Получить все товары (только для чтения)
+     * Получить все товары
      */
     getItems(): IProduct[] {
-        // Возвращаем копию, чтобы предотвратить прямую мутацию
-        return [...this._items];
+        return this._items;
     }
 
     /**
-     * Поиск товара по id
+     * Получить товар по id
      */
     getProductById(id: string): IProduct | undefined {
-        if (!id) return undefined;
         return this._items.find(item => item.id === id);
     }
 
     /**
-     * Установить текущий выбранный товар
-     * @param product - выбранный товар (если null - сброс выбора)
+     * Сохранить выбранный товар
      */
-    setSelectedProduct(product: IProduct | null): void {
-        // Не эмитим событие, если выбор не изменился
-        if (this._selectedProduct?.id === product?.id) return;
-        
+    setSelectedProduct(product: IProduct): void {
         this._selectedProduct = product;
-        
-        // Эмитим только если есть что эмитить
-        if (product) {
-            this.events.emit('product:selected', { product });
-        } else {
-            this.events.emit('product:cleared');
-        }
     }
 
     /**
-     * Получить текущий выбранный товар
+     * Получить выбранный товар
      */
     getSelectedProduct(): IProduct | null {
         return this._selectedProduct;
-    }
-
-    /**
-     * Проверить, выбран ли какой-либо товар
-     */
-    hasSelectedProduct(): boolean {
-        return this._selectedProduct !== null;
-    }
-
-    /**
-     * Сбросить выбранный товар
-     */
-    clearSelectedProduct(): void {
-        this.setSelectedProduct(null);
-    }
-
-    /**
-     * Очистить весь каталог
-     */
-    clear(): void {
-        this._items = [];
-        this._selectedProduct = null;
-        this.events.emit('catalog:cleared');
     }
 }

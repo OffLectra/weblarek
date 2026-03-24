@@ -1,6 +1,5 @@
 import './scss/styles.scss';
 
-import { EventEmitter } from './components/base/Events';
 import { CatalogModel } from './components/models/CatalogModel';
 import { BasketModel } from './components/models/BasketModel';
 import { OrderModel } from './components/models/OrderModel';
@@ -10,10 +9,9 @@ import { apiProducts } from './utils/data';
 import { IProduct } from './types';
 
 
-const events = new EventEmitter();
-const catalog = new CatalogModel(events);
-const basket = new BasketModel(events);
-const order = new OrderModel(events);
+const catalog = new CatalogModel();
+const basket = new BasketModel();
+const order = new OrderModel();
 const api = new WebLarekAPI(API_URL);
 
 
@@ -42,17 +40,8 @@ console.log('getCount:', basket.getCount() === 2 ? 'OK' : 'FAIL');
 console.log('contains (existing):', basket.contains('id-1') === true ? 'OK' : 'FAIL');
 console.log('contains (non-existing):', basket.contains('id-3') === false ? 'OK' : 'FAIL');
 
-// Test total price with catalog data
-catalog.setItems(apiProducts.items as IProduct[]);
-basket.clear();
-basket.addItem(apiProducts.items[0].id); // price 750
-basket.addItem(apiProducts.items[1].id); // price 1450
-basket.addItem(apiProducts.items[2].id); // price null -> 0
-const total = basket.getTotalPrice(catalog.getItems());
-console.log('getTotalPrice (750+1450+0):', total === 2200 ? 'OK' : `FAIL (got ${total})`);
-
-basket.removeItem(apiProducts.items[0].id);
-console.log('removeItem:', basket.getItems().length === 2 ? 'OK' : 'FAIL');
+basket.removeItem('id-1');
+console.log('removeItem:', basket.getItems().length === 1 ? 'OK' : 'FAIL');
 
 basket.clear();
 console.log('clear:', basket.getItems().length === 0 ? 'OK' : 'FAIL');
@@ -60,38 +49,60 @@ console.log('clear:', basket.getItems().length === 0 ? 'OK' : 'FAIL');
 // ---OrderModel---
 console.log('\n--- OrderModel ---');
 
-console.log('Initial state:', order.getOrderData());
+console.log('Initial state:', {
+    payment: order.payment,
+    address: order.address,
+    email: order.email,
+    phone: order.phone
+});
+
+const emptyValidation = order.validate();
+console.log('validate (empty data):', 
+    emptyValidation.payment && 
+    emptyValidation.address && 
+    emptyValidation.email && 
+    emptyValidation.phone ? 'OK' : 'FAIL'
+);
+console.log('validateStepOne (empty):', order.validateStepOne() === false ? 'OK' : 'FAIL');
+console.log('validateStepTwo (empty):', order.validateStepTwo() === false ? 'OK' : 'FAIL');
 
 order.setAddress('Test Address');
 order.setPayment('cash');
 order.setEmail('test@example.com');
 order.setPhone('+7 999 888-77-66');
 
-const filled = order.getOrderData();
+const filled = {
+    payment: order.payment,
+    address: order.address,
+    email: order.email,
+    phone: order.phone
+};
+console.log('\nAfter filling:');
 console.log('setAddress/setPayment/setEmail/setPhone:',
-  filled.address === 'Test Address' &&
-  filled.payment === 'cash' &&
-  filled.email === 'test@example.com' &&
-  filled.phone === '+7 999 888-77-66' ? 'OK' : 'FAIL'
+    filled.address === 'Test Address' &&
+    filled.payment === 'cash' &&
+    filled.email === 'test@example.com' &&
+    filled.phone === '+7 999 888-77-66' ? 'OK' : 'FAIL'
 );
 
-const validation = order.validate();
-console.log('validate (all fields filled):', Object.keys(validation).length === 0 ? 'OK' : 'FAIL');
-
-console.log('validateStepOne:', order.validateStepOne() === true ? 'OK' : 'FAIL');
-console.log('validateStepTwo:', order.validateStepTwo() === true ? 'OK' : 'FAIL');
+const filledValidation = order.validate();
+console.log('validate (filled data):', Object.keys(filledValidation).length === 0 ? 'OK' : 'FAIL');
+console.log('validateStepOne (filled):', order.validateStepOne() === true ? 'OK' : 'FAIL');
+console.log('validateStepTwo (filled):', order.validateStepTwo() === true ? 'OK' : 'FAIL');
 
 order.clear();
-console.log('clear:', order.getOrderData().address === '' ? 'OK' : 'FAIL');
+console.log('\nAfter clear:');
+console.log('clear:', order.address === '' ? 'OK' : 'FAIL');
 
-order.setOrderData({ address: 'New Address', email: 'new@test.com' });
-const partial = order.getOrderData();
-console.log('setOrderData (partial update):',
-  partial.address === 'New Address' &&
-  partial.email === 'new@test.com' &&
-  partial.payment === 'card' &&
-  partial.phone === '' ? 'OK' : 'FAIL'
+const clearedValidation = order.validate();
+console.log('validate (after clear):', 
+    clearedValidation.payment && 
+    clearedValidation.address && 
+    clearedValidation.email && 
+    clearedValidation.phone ? 'OK' : 'FAIL'
 );
+console.log('validateStepOne (after clear):', order.validateStepOne() === false ? 'OK' : 'FAIL');
+console.log('validateStepTwo (after clear):', order.validateStepTwo() === false ? 'OK' : 'FAIL');
 
 // ---SUMMARY---
 console.log('\n---SUMMARY---');
