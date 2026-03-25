@@ -1,73 +1,52 @@
-import { TPayment, IBuyerValidation } from '../../types';
+import { IBuyer } from '../../types';
+
+
+type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
+
 
 /**
  * Модель заказа
- * Управляет данными покупателя и их валидацией
  */
 export class OrderModel {
-    protected _payment: TPayment | null = null;
-    protected _address: string = '';
-    protected _email: string = '';
-    protected _phone: string = '';
+    private dataBayer: Partial<IBuyer> = {};
 
-    get payment(): TPayment | null {
-        return this._payment;
+    /**
+     * Сохранение данных покупателя
+     */
+    setData(dataBayer: Partial<IBuyer>): void {
+        this.dataBayer = { ...this.dataBayer, ...dataBayer };
     }
 
-    get address(): string {
-        return this._address;
-    }
-
-    get email(): string {
-        return this._email;
-    }
-
-    get phone(): string {
-        return this._phone;
-    }
-
-    setPayment(payment: TPayment): void {
-        this._payment = payment;
-    }
-
-    setAddress(address: string): void {
-        this._address = address;
-    }
-
-    setEmail(email: string): void {
-        this._email = email;
-    }
-
-    setPhone(phone: string): void {
-        this._phone = phone;
+    /**
+     * Получить все данные
+     */
+    getData(): Partial<IBuyer> {
+        return this.dataBayer;
     }
 
     /**
      * Очистить все данные заказа
      */
     clear(): void {
-        this._payment = null;
-        this._address = '';
-        this._email = '';
-        this._phone = '';
+        this.dataBayer = {};
     }
 
     /**
      * Валидация данных заказа
      */
-    validate(): IBuyerValidation {
-        const errors: IBuyerValidation = {};
+    validate(): TBuyerErrors {
+        const errors: TBuyerErrors = {};
 
-        if (!this._payment) {
+        if (!this.dataBayer.payment) {
             errors.payment = 'Не выбран способ оплаты';
         }
-        if (!this._address || this._address.trim() === '') {
+        if (!this.dataBayer.address) {
             errors.address = 'Укажите адрес доставки';
         }
-        if (!this._email || this._email.trim() === '') {
+        if (!this.dataBayer.email) {
             errors.email = 'Укажите email';
         }
-        if (!this._phone || this._phone.trim() === '') {
+        if (!this.dataBayer.phone) {
             errors.phone = 'Укажите номер телефона';
         }
 
@@ -75,18 +54,10 @@ export class OrderModel {
     }
 
     /**
-     * Проверить валидность данных для первого шага (оплата, адрес)
+     * Проверка валидности данных
      */
-    validateStepOne(): boolean {
-        const errors = this.validate();
-        return !errors.payment && !errors.address;
+    isDataValid(): boolean {
+        return Object.keys(this.validate()).length === 0;
     }
 
-    /**
-     * Проверить валидность данных для второго шага (email, телефон)
-     */
-    validateStepTwo(): boolean {
-        const errors = this.validate();
-        return !errors.email && !errors.phone;
-    }
 }

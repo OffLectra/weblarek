@@ -1,32 +1,30 @@
+import { IProduct } from "../../types";
 
 /**
  * Модель корзины
- * Управляет идентификаторами товаров, выбранных пользователем
  */
 export class BasketModel {
-    protected _items: string[] = [];
+    private _items: IProduct[] = [];
 
     /**
-     * Получить массив id товаров в корзине
+     * Получить массив товаров в корзине
      */
-    getItems(): string[] {
+    getItems(): IProduct[] {
         return this._items;
     }
 
     /**
      * Добавить товар в корзину
      */
-    addItem(id: string): void {
-        if (!this._items.includes(id)) {
-            this._items.push(id);
-        }
+    addItem(item: IProduct): void {
+        this._items.push(item);
     }
 
     /**
-     * Удалить товар из корзины
+     * Удалить товар из корзины (по Id)
      */
     removeItem(id: string): void {
-        this._items = this._items.filter(itemId => itemId !== id);
+        this._items = this._items.filter(item => item.id !== id);
     }
 
     /**
@@ -37,6 +35,13 @@ export class BasketModel {
     }
 
     /**
+     * Получить общую стоимость товаров в корзине
+     */
+    getTotal(): number {
+        return this._items.reduce((total, item) => total + (item.price || 0), 0);
+    }
+
+    /**
      * Получить количество товаров в корзине
      */
     getCount(): number {
@@ -44,9 +49,9 @@ export class BasketModel {
     }
 
     /**
-     * Проверить наличие товара в корзине по id
+     * Проверить наличие товара в корзине (по Id)
      */
-    contains(id: string): boolean {
-        return this._items.includes(id);
+    containsItem(id: string): boolean {
+        return this._items.some(item => item.id === id);
     }
 }

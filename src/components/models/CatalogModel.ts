@@ -2,7 +2,6 @@ import { IProduct } from '../../types';
 
 /**
  * ћодель каталога товаров
- * ”правл€ет списком товаров и отслеживает выбранный продукт
  */
 export class CatalogModel {
     protected _items: IProduct[] = [];

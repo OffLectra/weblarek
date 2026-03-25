@@ -1,27 +1,21 @@
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export interface IApi {
-  baseUrl: string;
   get<T extends object>(uri: string): Promise<T>;
   post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-/**
- * Тип категории товара
- */
-export type TCategory = 'софт-скил' | 'хард-скил' | 'кнопка' | 'дополнительное' | 'другое';
 
 /**
- * Товар в каталоге
- * Соответствует структуре данных, возвращаемой сервером
+ * Интерфейс товара
  */
 export interface IProduct {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: TCategory;
-  price: number | null;
+    id: string;
+    description: string;
+    image: string;
+    title: string;
+    category: string;
+    price: number | null;
 }
 
 /**
@@ -30,45 +24,20 @@ export interface IProduct {
 export type TPayment = 'card' | 'cash';
 
 /**
- * Данные покупателя для оформления заказа
+ * Интерфейс покупателя
  */
 export interface IBuyer {
-  payment: TPayment;
-  email: string;
-  phone: string;
-  address: string;
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
 }
 
 /**
- * Данные для отправки заказа на сервер
+ * Интерфейс заказа
+ * Для отправки на сервер
  */
 export interface IOrder extends IBuyer {
-  items: string[];
-  total: number;
-}
-
-/**
- * Ответ сервера после успешного заказа
- */
-export interface IOrderResult {
-  id: string;
-  total: number;
-}
-
-/**
- * Ответ сервера с каталогом товаров
- */
-export interface IProductsResponse {
-  items: IProduct[];
-  total: number;
-}
-
-/**
- * Данные для проверки валидации покупателя (ошибка может отсутствовать для поля)
- */
-export interface IBuyerValidation {
-  payment?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
+    total: number;
+    items: string[];
 }
