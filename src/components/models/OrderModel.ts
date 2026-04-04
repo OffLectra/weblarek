@@ -8,19 +8,24 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
  * Модель заказа
  */
 export class OrderModel {
-    private dataBayer: Partial<IBuyer> = {};
+    private dataBayer: IBuyer = {
+        payment: null,
+        email: "",
+        phone: "",
+        address: "",
+    };
 
     /**
      * Сохранение данных покупателя
      */
-    setData(dataBayer: Partial<IBuyer>): void {
-        this.dataBayer = { ...this.dataBayer, ...dataBayer };
+    setData(dataBayer: IBuyer): void {
+        this.dataBayer = dataBayer;
     }
 
     /**
      * Получить все данные
      */
-    getData(): Partial<IBuyer> {
+    getData(): IBuyer {
         return this.dataBayer;
     }
 
@@ -28,14 +33,24 @@ export class OrderModel {
      * Очистить все данные заказа
      */
     clear(): void {
-        this.dataBayer = {};
+        this.dataBayer = {
+            payment: null,
+            email: "",
+            phone: "",
+            address: "",
+        };
     }
 
     /**
      * Валидация данных заказа
      */
-    validate(): TBuyerErrors {
-        const errors: TBuyerErrors = {};
+    validateFields(): TBuyerErrors {
+        const errors: TBuyerErrors = {
+            payment: "",
+            email: "",
+            phone: "",
+            address: "",
+        };
 
         if (!this.dataBayer.payment) {
             errors.payment = 'Не выбран способ оплаты';
@@ -52,12 +67,4 @@ export class OrderModel {
 
         return errors;
     }
-
-    /**
-     * Проверка валидности данных
-     */
-    isDataValid(): boolean {
-        return Object.keys(this.validate()).length === 0;
-    }
-
 }

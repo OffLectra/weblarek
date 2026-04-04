@@ -6,7 +6,7 @@ import { OrderModel } from './components/models/OrderModel';
 import { WebLarekAPI } from './components/communication/WebLarekAPI';
 import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
-import { IProduct } from './types';
+import { IOrder, IProduct } from './types';
 import { Api } from './components/base/Api';
 
 
@@ -78,36 +78,40 @@ console.log('\n--- OrderModel ---');
 console.log('Initial state:', order.getData());
 
 
-const emptyValidation = order.validate();
+const emptyValidation = order.validateFields();
 console.log('validate (empty data):',
     emptyValidation.payment && emptyValidation.address && emptyValidation.email && emptyValidation.phone ? 'OK' : 'FAIL'
 );
-console.log('isDataValid (empty):', order.isDataValid() === false ? 'OK' : 'FAIL');
 
-order.setData({ address: 'Test Address', payment: 'cash' });
+order.setData({ address: 'Test Address', payment: 'cash', email: '', phone: ''});
 console.log('\nAfter partial fill (address + payment):', order.getData());
 
-const partialValidation = order.validate();
+const partialValidation = order.validateFields();
 console.log('validate (partial):',
     !partialValidation.payment && !partialValidation.address && partialValidation.email && partialValidation.phone ? 'OK' : 'FAIL'
 );
-console.log('isDataValid (partial):', order.isDataValid() === false ? 'OK' : 'FAIL');
 
-order.setData({ email: 'test@example.com', phone: '+7 999 888-77-66' });
-console.log('\nAfter full fill:', order.getData());
+order.setData({ email: 'test@example.com', phone: '+7 999 888-77-66',  address: '', payment: null });
+console.log('\nAfter partial second variant fill:', order.getData());
 
-const fullValidation = order.validate();
-console.log('validate (full):', Object.keys(fullValidation).length === 0 ? 'OK' : 'FAIL');
-console.log('isDataValid (full):', order.isDataValid() === true ? 'OK' : 'FAIL');
+const partialValidationSecond = order.validateFields();
+console.log('validate (partial):',
+    partialValidationSecond.payment && partialValidationSecond.address && !partialValidationSecond.email && !partialValidationSecond.phone ? 'OK' : 'FAIL'
+);
+
+order.setData({ address: 'Test Address full', payment: 'card', email: 'test@example.com', phone: '+7 999 888-77-66' });
+console.log('\Full:', order.getData());
+const fullValidation = order.validateFields();
+console.log('validate (full):',
+    !fullValidation.payment && !fullValidation.address && !fullValidation.email && !fullValidation.phone ? 'OK' : 'FAIL');
 
 order.clear();
 console.log('\nAfter clear:', order.getData());
 
-const clearedValidation = order.validate();
+const clearedValidation = order.validateFields();
 console.log('validate (after clear):',
     clearedValidation.payment && clearedValidation.address && clearedValidation.email && clearedValidation.phone ? 'OK' : 'FAIL'
 );
-console.log('isDataValid (after clear):', order.isDataValid() === false ? 'OK' : 'FAIL');
 
 
 
@@ -119,10 +123,49 @@ console.log('All tests completed.');
 console.log('\n---API Request---');
 
 api.getProducts()
-    .then(data => {
-        catalog.setItems(data);
-        console.log('getProducts:', catalog.getItems().length === data.length ? 'OK' : 'FAIL');
+    .then(data => { 
+        catalog.setItems(data); 
+        console.log('getProducts:', catalog.getItems().length === data.length ? 'OK' : 'FAIL'); 
     })
     .catch(error => {
-        console.error('getProducts:', error);
-    });
+        console.error('getProducts:Ошибка при попытке получения списка товаров:', error);
+    })
+
+
+const successOrder: IOrder = {
+    payment: "card",
+    email: "test@test.ru",
+    phone: "+71234567890",
+    address: "Spb Vosstania 1",
+    total: 2200,
+    items: [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9"
+    ]
+};
+console.log('successOrder:', successOrder);
+api.postOrder(successOrder)
+    .then(data => { 
+        console.log('postOrder:', data && typeof data.id === 'string' && typeof data.total === 'number' ? 'OK' : 'FAIL'); 
+    })
+    .catch(error => {
+        console.error('postOrder error:', error);
+    })
+
+const productNotFoundOrder: IOrder = {
+    ...successOrder,
+    items: [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d" // неверный id
+    ]
+};
+console.log('productNotFoundOrder:', productNotFoundOrder);
+
+api.postOrder(productNotFoundOrder)
+    .then(() => {
+        console.log('postOrder error: FAIL'); 
+    })
+    .catch(error => {
+        console.log('postOrder error message:', error);
+        console.log('postOrder error: OK');
+    })

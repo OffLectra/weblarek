@@ -21,7 +21,7 @@ export interface IProduct {
 /**
  * Тип оплаты
  */
-export type TPayment = 'card' | 'cash';
+export type TPayment = 'card' | 'cash' | null ;
 
 /**
  * Интерфейс покупателя
@@ -40,4 +40,12 @@ export interface IBuyer {
 export interface IOrder extends IBuyer {
     total: number;
     items: string[];
+}
+
+/**
+ * Интерфейс ответа от сервера при успешном создании заказа
+ */
+export interface IOrderResponse {
+    id: string;
+    total: number;
 }
