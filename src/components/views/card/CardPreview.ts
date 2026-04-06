@@ -60,17 +60,19 @@ export class CardPreview extends Card<TCardPreview> {
 
     set inBasket(value: boolean) {
         this._inBasket = value;
-        if (value) {
-            this.buttonElement.textContent = 'Удалить из корзины';
-        } else {
-            this.buttonElement.textContent = 'Купить';
+        if (!this.buttonElement.disabled){
+            if (value) {
+                this.buttonElement.textContent = 'Удалить из корзины';
+            } else {
+                this.buttonElement.textContent = 'Купить';
+            }
         }
     }
 
     set price(value: number | null) {
         super.price = value;
-        if (value === null) {
-            this.buttonElement.textContent = '';
+        if (!value) {
+            this.buttonElement.textContent = 'Недоступно';
             this.buttonElement.disabled = true;
         } else {
             this.buttonElement.disabled = false;
