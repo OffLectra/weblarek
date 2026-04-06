@@ -1,7 +1,7 @@
 import { Component } from "../../base/Component";
 import { ensureElement } from "../../../utils/utils";
 import { IProduct } from "../../../types";
-import { categoryMap } from "../../../utils/constants";
+import { categoryMap, PRICE_SUFFIX } from "../../../utils/constants";
 
 export type CategoryKey = keyof typeof categoryMap;
 
@@ -23,7 +23,7 @@ export abstract class Card<T extends IProduct> extends Component<T> {
         if (value === null) {
             this.priceElement.textContent = 'Бесценно';
         } else {
-            this.priceElement.textContent = `${value} синапсов`;
+            this.priceElement.textContent = `${value} ${PRICE_SUFFIX}`;
         }
     }
 

@@ -2,7 +2,7 @@ import { IBuyer } from '../../types';
 import { EventEmitter } from '../base/Events';
 
 
-type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
+export type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 
 export enum OrderEvents {
@@ -30,8 +30,8 @@ export class OrderModel {
     /**
      * Сохранение данных покупателя
      */
-    setData(dataBayer: IBuyer): void {
-        this.dataBayer = dataBayer;
+    setData(dataBayer: Partial<IBuyer>): void {
+        this.dataBayer = { ...this.dataBayer, ...dataBayer };
         this.events.emit(OrderEvents.DATA_CHANGED);
     }
 

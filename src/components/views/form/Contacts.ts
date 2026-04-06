@@ -8,7 +8,8 @@ export interface IContactsData {
 }
 
 export enum ContactsEvents {
-    SUBMIT = 'contacts:submit'
+    SUBMIT = 'contacts:submit',
+    FIELD_CHANGED = 'contacts:field-changed'
 }
 
 export class Contacts extends Form<IContactsData> {
@@ -25,37 +26,43 @@ export class Contacts extends Form<IContactsData> {
         this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
 
         this.emailInput.addEventListener('input', () => {
-            this.validate();
-            this.updateSubmitButton();
+            this.events.emit(ContactsEvents.FIELD_CHANGED, {
+                field: 'email',
+                value: this.emailInput.value.trim()
+            });
         });
 
         this.phoneInput.addEventListener('input', () => {
-            this.validate();
-            this.updateSubmitButton();
+            this.events.emit(ContactsEvents.FIELD_CHANGED, {
+                field: 'phone',
+                value: this.phoneInput.value.trim()
+            });
         });
-    }
-
-    protected validate(): void {
-        const errors: string[] = [];
-        
-        if (!this.emailInput.value.trim()) {
-            errors.push('Укажите email');
-        }
-        if (!this.phoneInput.value.trim()) {
-            errors.push('Укажите номер телефона');
-        }
-        
-        this.showErrors(errors);
-    }
-
-    protected isValid(): boolean {
-        return this.emailInput.value.trim().length > 0 && this.phoneInput.value.trim().length > 0;
     }
 
     protected submit(): void {
-        this.events.emit(ContactsEvents.SUBMIT, {
-            email: this.emailInput.value.trim(),
-            phone: this.phoneInput.value.trim()
-        });
+        this.events.emit(ContactsEvents.SUBMIT);
+    }
+
+    reset(): void {
+        this.emailInput.value = '';
+        this.phoneInput.value = '';
+        this.submitButton.disabled = true;
+    }
+
+    set email(value: string) {
+        this.emailInput.value = value;
+    }
+
+    set phone(value: string) {
+        this.phoneInput.value = value;
+    }
+
+    set errors(value: string) {
+        this.showErrors(value ? [value] : []);
+    }
+
+    set valid(value: boolean) {
+        this.submitButton.disabled = !value;
     }
 }

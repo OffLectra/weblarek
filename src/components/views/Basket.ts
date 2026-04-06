@@ -1,6 +1,7 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
+import { PRICE_SUFFIX } from "../../utils/constants";
 
 export interface IBasketData {
     itemsList: HTMLElement[];
@@ -44,7 +45,7 @@ export class Basket extends Component<IBasketData> {
     }
 
     set total(value: number) {
-        this.price.textContent = `${value} синапсов`;
+        this.price.textContent = `${value} ${PRICE_SUFFIX}`;
     }
 
     set disabled(value: boolean) {

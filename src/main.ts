@@ -3,7 +3,7 @@ import './scss/styles.scss';
 import { EventEmitter } from './components/base/Events';
 import { CatalogModel, CatalogEvents } from './components/models/CatalogModel';
 import { BasketModel, BasketEvents } from './components/models/BasketModel';
-import { OrderModel } from './components/models/OrderModel';
+import { OrderModel, OrderEvents, TBuyerErrors } from './components/models/OrderModel';
 import { WebLarekAPI } from './components/communication/WebLarekAPI';
 import { Api } from './components/base/Api';
 import { API_URL, CDN_URL } from './utils/constants';
@@ -12,19 +12,57 @@ import { Header, HeaderEvents } from './components/views/Header';
 import { Gallery } from './components/views/Gallery';
 import { Modal } from './components/views/Modal';
 import { Basket, BasketEvents as ViewBasketEvents } from './components/views/Basket';
-import { Order, OrderEvents as ViewOrderEvents } from './components/views/form/Order';
+import { Order, ViewOrderEvents } from './components/views/form/Order';
 import { Contacts, ContactsEvents } from './components/views/form/Contacts';
 import { Success, SuccessEvents } from './components/views/Success';
 import { CardCatalog } from './components/views/card/CardCatalog';
 import { CardPreview, CardPreviewEvents } from './components/views/card/CardPreview';
 import { CardBasket } from './components/views/card/CardBasket';
-import { TPayment, IOrder } from './types';
+import { IOrder, IBuyer } from './types';
 
 const events = new EventEmitter();
 
 const catalog = new CatalogModel(events);
 const basket = new BasketModel(events);
 const order = new OrderModel(events);
+
+events.on(ViewOrderEvents.FIELD_CHANGED, (data: { field: string; value: unknown }) => {
+    order.setData({ [data.field]: data.value } as Partial<IBuyer>);
+});
+
+events.on(ContactsEvents.FIELD_CHANGED, (data: { field: string; value: unknown }) => {
+    order.setData({ [data.field]: data.value } as Partial<IBuyer>);
+});
+
+function filterErrors(errors: TBuyerErrors, fields: (keyof IBuyer)[]): TBuyerErrors {
+    return fields.reduce((acc, field) => {
+        if (errors[field]) {
+            acc[field] = errors[field];
+        }
+        return acc;
+    }, {} as TBuyerErrors);
+}
+
+events.on(OrderEvents.DATA_CHANGED, () => {
+    const errors = order.validateFields();
+    
+    const orderErrors = filterErrors(errors, ['payment', 'address']);
+    orderView.errors = Object.values(orderErrors).join(', ');
+    orderView.valid = Object.keys(orderErrors).length === 0;
+    orderView.selectedPayment = order.getData().payment;
+    orderView.address = order.getData().address;
+    
+    const contactsErrors = filterErrors(errors, ['email', 'phone']);
+    contactsView.errors = Object.values(contactsErrors).join(', ');
+    contactsView.valid = Object.keys(contactsErrors).length === 0;
+    contactsView.email = order.getData().email;
+    contactsView.phone = order.getData().phone;
+});
+
+events.on(OrderEvents.CLEARED, () => {
+    orderView.reset();
+    contactsView.reset();
+});
 
 const baseApi = new Api(API_URL);
 const api = new WebLarekAPI(baseApi);
@@ -35,6 +73,15 @@ const modal = new Modal(events, ensureElement<HTMLElement>('#modal-container'));
 
 const basketTemplate = cloneTemplate<HTMLElement>('#basket');
 const basketView = new Basket(events, basketTemplate);
+
+const orderTemplate = cloneTemplate<HTMLElement>('#order');
+const orderView = new Order(events, orderTemplate);
+
+const contactsTemplate = cloneTemplate<HTMLElement>('#contacts');
+const contactsView = new Contacts(events, contactsTemplate);
+
+const previewTemplate = cloneTemplate<HTMLElement>('#card-preview');
+const previewView = new CardPreview(events, previewTemplate);
 
 events.on(CatalogEvents.ITEMS_CHANGED, () => {
     const items = catalog.getItems();
@@ -80,9 +127,6 @@ events.on(CatalogEvents.SELECTED_PRODUCT_CHANGED, () => {
     const product = catalog.getSelectedProduct();
     if (!product) return;
     
-    const previewTemplate = cloneTemplate<HTMLElement>('#card-preview');
-    const previewView = new CardPreview(events, previewTemplate);
-    
     previewView.title = product.title;
     previewView.description = product.description;
     previewView.price = product.price;
@@ -107,21 +151,14 @@ events.on(CardPreviewEvents.TOGGLE, () => {
 });
 
 events.on(ViewBasketEvents.SUBMIT, () => {
-    order.clear();
-    const orderTemplate = cloneTemplate<HTMLElement>('#order');
-    const orderView = new Order(events, orderTemplate);
     modal.content = orderView.render();
 });
 
-events.on(ViewOrderEvents.SUBMIT, (data: { payment: TPayment; address: string }) => {
-    order.setData({ ...order.getData(), ...data });
-    const contactsTemplate = cloneTemplate<HTMLElement>('#contacts');
-    const contactsView = new Contacts(events, contactsTemplate);
+events.on(ViewOrderEvents.SUBMIT, () => {
     modal.content = contactsView.render();
 });
 
-events.on(ContactsEvents.SUBMIT, (data: { email: string; phone: string }) => {
-    order.setData({ ...order.getData(), ...data });
+events.on(ContactsEvents.SUBMIT, () => {
     const orderData: IOrder = {
         ...order.getData(),
         items: basket.getItems().map(item => item.id),

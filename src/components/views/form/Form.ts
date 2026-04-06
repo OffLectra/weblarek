@@ -17,20 +17,11 @@ export abstract class Form<T> extends Component<T> {
 
     protected handleSubmit(event: Event) {
         event?.preventDefault();
-        this.validate();
-        if (this.isValid()) {
-            this.submit();
-        }
+        this.submit();
     }
 
-    protected abstract validate(): void;
-    protected abstract isValid(): boolean;
     protected abstract submit(): void;
-
-    protected updateSubmitButton() {
-        this.validate();
-        this.submitButton.disabled = !this.isValid();
-    }
+    abstract reset(): void;
 
     protected showErrors(errors: string[]) {
         this.errorsElement.textContent = errors.join(', ');

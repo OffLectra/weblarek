@@ -158,6 +158,14 @@ type TPayment = 'card' | 'cash' | null;
 type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 ```
 
+### Константы
+
+#### `PRICE_SUFFIX`
+Суффикс для отображения цены товаров:
+```typescript
+const PRICE_SUFFIX = 'синапсов';
+```
+
 ## Модели данных
 Модели данных реализуют слой Model в архитектуре MVP. Они отвечают за хранение данных и их изменение.
 
@@ -167,13 +175,14 @@ type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 **Назначение:** хранение списка всех доступных товаров и отслеживание выбранного для просмотра товара.
 
 **Конструктор:**
-- `constructor()` - не принимает параметров.
+- `constructor(events: EventEmitter)` — принимает экземпляр EventEmitter для генерации событий.
 
 **Поля:**
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `_items` | `IProduct[]` | Внутренний массив всех товаров |
 | `_selectedProduct` | `IProduct \| null` | Текущий выбранный товар (или null) |
+| `events` | `EventEmitter` | Брокер событий для уведомления об изменениях |
 
 **Методы:**
 | Метод | Параметры | Возвращает | Описание |
@@ -192,12 +201,13 @@ type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 **Назначение:** хранение идентификаторов товаров, добавленных пользователем, управление ими.
 
 **Конструктор:**
-- `constructor()` — не принимает параметров.
+- `constructor(events: EventEmitter)` — принимает экземпляр EventEmitter для генерации событий.
 
 **Поля:**
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `_items` | `IProduct[]` | Внутренний массив товаров в корзине (хранятся полные объекты) |
+| `events` | `EventEmitter` | Брокер событий для уведомления об изменениях |
 
 **Методы:**
 | Метод | Параметры | Возвращает | Описание |
@@ -218,13 +228,14 @@ type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 **Назначение:** хранение и валидация данных покупателя (способ оплаты, адрес, email, телефон).
 
 **Конструктор:**
-- `constructor()` - не принимает параметров.
+- `constructor(events: EventEmitter)` — принимает экземпляр EventEmitter для генерации событий.
 
 **Поля:**
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `dataBayer` | `IBuyer` | Данные покупателя (полный объект, поля могут быть `null` или пустыми строками) |
+| `events` | `EventEmitter` | Брокер событий для уведомления об изменениях |
 
 **Методы:**
 
@@ -393,7 +404,7 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 **Назначение:** карточка товара в каталоге на главной странице.
 
-**Конструктор:** `constructor(events: IEvents, container: HTMLElement, actions?: ICardActions)`
+**Конструктор:** `constructor(container: HTMLElement, actions?: ICardActions)`
 
 **Поля:**
 | Поле | Тип | Описание |
@@ -432,8 +443,7 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 - `price` — управляет доступностью кнопки при null
 
 **События:**
-- `product:add` — при клике "Купить"
-- `product:remove` — при клике "Удалить из корзины"
+- `product:toggle` — при клике на кнопку (добавление или удаление из корзины)
 
 ---
 
@@ -441,7 +451,7 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 **Назначение:** карточка товара в корзине.
 
-**Конструктор:** `constructor(events: IEvents, container: HTMLElement)`
+**Конструктор:** `constructor(container: HTMLElement, actions?: ICardBasketActions)`
 
 **Поля:**
 | Поле | Тип | Описание |
@@ -449,11 +459,10 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 | `counterElement` | `HTMLElement` | Индекс товара в корзине |
 | `basketButtonDelete` | `HTMLButtonElement` | Кнопка удаления |
 
+**Интерфейс:** `ICardBasketActions` с полем `onDelete` для обработки удаления
+
 **Сеттеры:**
 - `index` — устанавливает порядковый номер
-
-**События:**
-- `product:remove` — при клике на кнопку удаления
 
 ---
 
@@ -471,9 +480,6 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 **Методы:**
 - `handleSubmit` — обработчик отправки формы
-- `validate` — абстрактный метод валидации (реализуется в дочерних)
-- `isValid` — абстрактный метод проверки валидности (реализуется в дочерних)
-- `updateSubmitButton` — обновляет состояние кнопки на основе валидности
 - `showErrors` — отображает ошибки валидации
 
 ---
@@ -489,17 +495,16 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 |------|-----|----------|
 | `addressInput` | `HTMLInputElement` | Поле ввода адреса |
 | `paymentButtons` | `HTMLElement` | Контейнер кнопок выбора оплаты |
-| `_selectedPayment` | `TPayment` | Выбранный способ оплаты |
 
 **Сеттеры:**
-- `payment` — устанавливает выбранный способ оплаты с подсветкой кнопки
-
-**Методы:**
-- `validate` — валидация: выбран способ оплаты и адрес не пустой
-- `isValid` — возвращает true если валидно
+- `selectedPayment` — устанавливает выбранный способ оплаты с подсветкой кнопки
+- `address` — устанавливает значение поля адреса
+- `errors` — отображает ошибки валидации
+- `valid` — включает/отключает кнопку отправки
 
 **События:**
 - `order:submit` — при успешной валидации и отправке формы
+- `order:field-changed` — при изменении любого поля формы. Данные: `{ field: string, value: unknown }`
 
 ---
 
@@ -515,12 +520,15 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 | `emailInput` | `HTMLInputElement` | Поле ввода email |
 | `phoneInput` | `HTMLInputElement` | Поле ввода телефона |
 
-**Методы:**
-- `validate` — валидация: email и phone не пустые
-- `isValid` — возвращает true если валидно
+**Сеттеры:**
+- `email` — устанавливает значение поля email
+- `phone` — устанавливает значение поля телефона
+- `errors` — отображает ошибки валидации
+- `valid` — включает/отключает кнопку отправки
 
 **События:**
 - `contacts:submit` — при успешной валидации и отправке формы
+- `contacts:field-changed` — при изменении любого поля формы. Данные: `{ field: string, value: unknown }`
 
 ---
 
@@ -531,12 +539,18 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 | Событие | Генерируется | Описание |
 |---------|--------------|----------|
 | `basket:open` | `Header` | Клик по иконке корзины в шапке |
-| `card:click` | `CardCatalog` | Клик по карточке товара в каталоге. Данные: `{ id: string }` |
-| `product:add` | `CardPreview` | Нажатие кнопки "Купить" в модальном окне товара |
-| `product:remove` | `CardPreview`, `CardBasket` | Нажатие кнопки "Удалить из корзины" или кнопки удаления в корзине. Данные: `{ id: string }` |
+| `card:click` | `CardCatalog` | Клик по карточке товара в каталоге |
+| `catalog:items-changed` | `CatalogModel` | Изменение списка товаров в каталоге |
+| `catalog:selected-product-changed` | `CatalogModel` | Выбран новый товар для просмотра |
+| `basket:changed` | `BasketModel` | Изменение содержимого корзины |
+| `product:toggle` | `CardPreview` | Нажатие кнопки "Купить" / "Удалить из корзины" в модальном окне товара |
 | `basket:submit` | `Basket` | Нажатие кнопки "Оформить" в модальном окне корзины |
-| `order:submit` | `Order` | Переход к следующему шагу оформления (форма контактов). Данные: `{ payment: TPayment, address: string }` |
-| `contacts:submit` | `Contacts` | Нажатие кнопки "Оплатить" (финальный шаг). Данные: `{ email: string, phone: string }` |
+| `order:field-changed` | `Order` | Изменение полей формы заказа (способ оплаты, адрес) |
+| `order:submit` | `Order` | Переход к следующему шагу оформления (форма контактов) |
+| `contacts:field-changed` | `Contacts` | Изменение полей формы контактов (email, телефон) |
+| `contacts:submit` | `Contacts` | Нажатие кнопки "Оплатить" (финальный шаг) |
+| `order:data-changed` | `OrderModel` | Изменение данных покупателя (для валидации) |
+| `order:cleared` | `OrderModel` | Очистка данных заказа |
 | `success:close` | `Success` | Клик по кнопке закрытия окна успешной оплаты |
 
 ---
@@ -560,17 +574,20 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 | Событие | Источник | Обработчик |
 |---------|----------|------------|
 | `catalog:items-changed` | `CatalogModel` | Рендеринг карточек товаров в галерее |
-| `basket:changed` | `BasketModel` | Обновление счётчика в Header, рендеринг товаров в корзине |
 | `catalog:selected-product-changed` | `CatalogModel` | Открытие модального окна с превью товара |
+| `basket:changed` | `BasketModel` | Обновление счётчика в Header, рендеринг товаров в корзине |
+| `order:data-changed` | `OrderModel` | Валидация полей форм, обновление состояния кнопок |
+| `order:cleared` | `OrderModel` | Сброс форм Order и Contacts в начальное состояние |
 
 #### События представлений
 | Событие | Источник | Обработчик |
 |---------|----------|------------|
 | `basket:open` | `Header` | Открытие модального окна с корзиной |
-| `product:add` | `CardPreview` | Добавление товара в корзину, закрытие модального окна |
-| `product:remove` | `CardBasket`, `CardPreview` | Удаление товара из корзины |
-| `basket:submit` | `Basket` | Переход к форме оформления заказа |
+| `product:toggle` | `CardPreview` | Добавление или удаление товара из корзины, закрытие модального окна |
+| `basket:submit` | `Basket` | Очистка данных заказа, переход к форме оформления |
+| `order:field-changed` | `Order` | Обновление данных в OrderModel |
 | `order:submit` | `Order` | Переход к форме контактов |
+| `contacts:field-changed` | `Contacts` | Обновление данных в OrderModel |
 | `contacts:submit` | `Contacts` | Отправка заказа на сервер, показ окна успеха |
 | `success:close` | `Success` | Закрытие модального окна |
 
@@ -578,8 +595,14 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 1. При загрузке страницы выполняется запрос к API (`api.getProducts()`)
 2. Полученные данные сохраняются в `CatalogModel` → событие `catalog:items-changed`
 3. Презентер обрабатывает событие → создаёт карточки товаров → передаёт в `Gallery`
-4. При клике на карточку → событие через `ICardActions.onClick` → устанавливается выбранный товар
-5. Изменение выбранного товара → событие `catalog:selected-product-changed` → открывается превью
-6. При добавлении товара в корзину → `BasketModel.addItem()` → событие `basket:changed` → обновляется UI
-7. Оформление заказа проходит через формы `Order` → `Contacts` → `Success`
-8. После успешного заказа корзина и данные заказа очищаются
+4. При клике на карточку → событие через `ICardActions.onClick` → устанавливается выбранный товар `catalog.setSelectedProduct()` → возникает событие `catalog:selected-product-changed`
+5. Презентер обрабатывает → открывается модальное окно с превью товара
+6. При клике на кнопку "Купить" → событие `product:toggle` → добавление товара в корзину → модальное окно закрывается
+7. При изменении содержимого корзины → событие `basket:changed` → обновление счётчика и списка товаров
+8. При клике на корзину → открывается модальное окно с корзиной
+9. При нажатии "Оформить" → `order.clear()` → открывается форма Order
+10. При изменении полей Order → событие `order:field-changed` → обновление данных в OrderModel → валидация
+11. При успешной валидации → `order:submit` → открывается форма Contacts
+12. При изменении полей Contacts → событие `contacts:field-changed` → обновление данных в OrderModel → валидация
+13. При успешной валидации → `contacts:submit` → отправка заказа на сервер → окно успеха
+14. После успешного заказа корзина и данные заказа очищаются

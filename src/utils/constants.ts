@@ -20,3 +20,5 @@ export const settings = {
 
 };
 
+export const PRICE_SUFFIX = 'синапсов';
+
