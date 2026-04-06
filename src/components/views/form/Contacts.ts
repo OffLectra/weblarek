@@ -7,7 +7,7 @@ export interface IContactsData {
     phone: string;
 }
 
-enum ContactsEvents {
+export enum ContactsEvents {
     SUBMIT = 'contacts:submit'
 }
 

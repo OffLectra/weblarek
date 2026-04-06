@@ -1,7 +1,7 @@
 import { IProduct } from '../../types';
 import { EventEmitter } from '../base/Events';
 
-enum CatalogEvents {
+export enum CatalogEvents {
     ITEMS_CHANGED = 'catalog:items-changed',
     SELECTED_PRODUCT_CHANGED = 'catalog:selected-product-changed'
 }

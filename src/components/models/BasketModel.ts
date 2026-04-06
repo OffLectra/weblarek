@@ -1,7 +1,7 @@
 import { IProduct } from "../../types";
 import { EventEmitter } from "../base/Events";
 
-enum BasketEvents {
+export enum BasketEvents {
     CHANGED = 'basket:changed'
 }
 

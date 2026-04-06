@@ -2,7 +2,7 @@ import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
 
-enum HeaderEvents {
+export enum HeaderEvents {
     BASKET_OPEN = 'basket:open'
 }
 

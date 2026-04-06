@@ -7,7 +7,7 @@ export interface IBasketData {
     total: number;
 }
 
-enum BasketEvents {
+export enum BasketEvents {
     SUBMIT = 'basket:submit'
 }
 

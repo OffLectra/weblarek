@@ -6,7 +6,7 @@ export interface ISuccessData {
     total: number;
 }
 
-enum SuccessEvents {
+export enum SuccessEvents {
     CLOSE = 'success:close'
 }
 

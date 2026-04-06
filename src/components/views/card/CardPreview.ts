@@ -6,9 +6,8 @@ import { Card } from "./Card";
 
 export type TCardPreview = Pick<IProduct, 'image' | 'category' | 'title' | 'price' | 'description' | 'id'> & { inBasket: boolean };
 
-enum CardPreviewEvents {
-    ADD = 'product:add',
-    REMOVE = 'product:remove'
+export enum CardPreviewEvents {
+    TOGGLE = 'product:toggle'
 }
 
 export class CardPreview extends Card<TCardPreview> {
@@ -30,11 +29,7 @@ export class CardPreview extends Card<TCardPreview> {
         this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
         this.buttonElement.addEventListener('click', () => {
-            if (this._inBasket) {
-                this.events.emit(CardPreviewEvents.REMOVE);
-            } else {
-                this.events.emit(CardPreviewEvents.ADD);
-            }
+            this.events.emit(CardPreviewEvents.TOGGLE);
         });
     }
 

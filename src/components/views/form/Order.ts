@@ -8,7 +8,7 @@ export interface IOrderData {
     address: string;
 }
 
-enum OrderEvents {
+export enum OrderEvents {
     SUBMIT = 'order:submit'
 }
 

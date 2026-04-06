@@ -5,7 +5,7 @@ import { EventEmitter } from '../base/Events';
 type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 
-enum OrderEvents {
+export enum OrderEvents {
     DATA_CHANGED = 'order:data-changed',
     CLEARED = 'order:cleared'
 }

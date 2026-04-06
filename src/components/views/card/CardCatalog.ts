@@ -1,4 +1,3 @@
-import { IEvents } from "../../base/Events";
 import { ensureElement } from "../../../utils/utils";
 import { categoryMap } from "../../../utils/constants";
 import { IProduct } from "../../../types";
@@ -7,7 +6,7 @@ import { Card } from "./Card";
 export type TCardCatalog = Pick<IProduct, 'image' | 'category' | 'title' | 'price' | 'description' | 'id'>;
 
 export interface ICardActions {
-    onClick?: (event: MouseEvent) => void;
+    onClick?: () => void;
 }
 
 export class CardCatalog extends Card<TCardCatalog> {
@@ -15,7 +14,6 @@ export class CardCatalog extends Card<TCardCatalog> {
     protected imageElement: HTMLImageElement;
 
     constructor(
-        protected events: IEvents,
         container: HTMLElement,
         actions?: ICardActions
     ) {
