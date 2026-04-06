@@ -1,55 +1,68 @@
 import { IProduct } from "../../types";
+import { EventEmitter } from "../base/Events";
+
+enum BasketEvents {
+    CHANGED = 'basket:changed'
+}
 
 /**
- * Ìîäåëü êîğçèíû
+ * ĞœĞ¾Ğ´ĞµĞ»ÑŒ ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ñ‹
  */
 export class BasketModel {
     private _items: IProduct[] = [];
 
+    protected events: EventEmitter;
+
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
     /**
-     * Ïîëó÷èòü ìàññèâ òîâàğîâ â êîğçèíå
+     * ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ Ğ¼Ğ°ÑÑĞ¸Ğ² Ñ‚Ğ¾Ğ²Ğ°Ñ€Ğ¾Ğ² Ğ² ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ğµ
      */
     getItems(): IProduct[] {
         return this._items;
     }
 
     /**
-     * Äîáàâèòü òîâàğ â êîğçèíó
+     * Ğ”Ğ¾Ğ±Ğ°Ğ²Ğ¸Ñ‚ÑŒ Ñ‚Ğ¾Ğ²Ğ°Ñ€ Ğ² ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ñƒ
      */
     addItem(item: IProduct): void {
         this._items.push(item);
+        this.events.emit(BasketEvents.CHANGED);
     }
 
     /**
-     * Óäàëèòü òîâàğ èç êîğçèíû (ïî Id)
+     * Ğ£Ğ´Ğ°Ğ»Ğ¸Ñ‚ÑŒ Ñ‚Ğ¾Ğ²Ğ°Ñ€ Ğ¸Ğ· ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ñ‹ (Ğ¿Ğ¾ Id)
      */
     removeItem(id: string): void {
         this._items = this._items.filter(item => item.id !== id);
+        this.events.emit(BasketEvents.CHANGED);
     }
 
     /**
-     * Î÷èñòèòü êîğçèíó ïîëíîñòüş
+     * ĞÑ‡Ğ¸ÑÑ‚Ğ¸Ñ‚ÑŒ ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ñƒ Ğ¿Ğ¾Ğ»Ğ½Ğ¾ÑÑ‚ÑŒÑ
      */
     clear(): void {
         this._items = [];
+        this.events.emit(BasketEvents.CHANGED);
     }
 
     /**
-     * Ïîëó÷èòü îáùóş ñòîèìîñòü òîâàğîâ â êîğçèíå
+     * ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ Ğ¾Ğ±Ñ‰ÑƒÑ ÑÑ‚Ğ¾Ğ¸Ğ¼Ğ¾ÑÑ‚ÑŒ Ñ‚Ğ¾Ğ²Ğ°Ñ€Ğ¾Ğ² Ğ² ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ğµ
      */
     getTotal(): number {
         return this._items.reduce((total, item) => total + (item.price || 0), 0);
     }
 
     /**
-     * Ïîëó÷èòü êîëè÷åñòâî òîâàğîâ â êîğçèíå
+     * ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ ĞºĞ¾Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ Ñ‚Ğ¾Ğ²Ğ°Ñ€Ğ¾Ğ² Ğ² ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ğµ
      */
     getCount(): number {
         return this._items.length;
     }
 
     /**
-     * Ïğîâåğèòü íàëè÷èå òîâàğà â êîğçèíå (ïî Id)
+     * ĞŸÑ€Ğ¾Ğ²ĞµÑ€Ğ¸Ñ‚ÑŒ Ğ½Ğ°Ğ»Ğ¸Ñ‡Ğ¸Ğµ Ñ‚Ğ¾Ğ²Ğ°Ñ€Ğ° Ğ² ĞºĞ¾Ñ€Ğ·Ğ¸Ğ½Ğµ (Ğ¿Ğ¾ Id)
      */
     containsItem(id: string): boolean {
         return this._items.some(item => item.id === id);

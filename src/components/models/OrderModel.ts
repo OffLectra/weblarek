@@ -1,11 +1,18 @@
 import { IBuyer } from '../../types';
+import { EventEmitter } from '../base/Events';
 
 
 type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 
+enum OrderEvents {
+    DATA_CHANGED = 'order:data-changed',
+    CLEARED = 'order:cleared'
+}
+
+
 /**
- * Модель заказа
+ * РњРѕРґРµР»СЊ Р·Р°РєР°Р·Р°
  */
 export class OrderModel {
     private dataBayer: IBuyer = {
@@ -15,22 +22,28 @@ export class OrderModel {
         address: "",
     };
 
+    protected events: EventEmitter;
+
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
     /**
-     * Сохранение данных покупателя
+     * РЎРѕС…СЂР°РЅРµРЅРёРµ РґР°РЅРЅС‹С… РїРѕРєСѓРїР°С‚РµР»СЏ
      */
     setData(dataBayer: IBuyer): void {
         this.dataBayer = dataBayer;
+        this.events.emit(OrderEvents.DATA_CHANGED);
     }
 
     /**
-     * Получить все данные
+     * РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ РґР°РЅРЅС‹Рµ
      */
     getData(): IBuyer {
         return this.dataBayer;
     }
 
     /**
-     * Очистить все данные заказа
+     * РћС‡РёСЃС‚РёС‚СЊ РІСЃРµ РґР°РЅРЅС‹Рµ Р·Р°РєР°Р·Р°
      */
     clear(): void {
         this.dataBayer = {
@@ -39,30 +52,26 @@ export class OrderModel {
             phone: "",
             address: "",
         };
+        this.events.emit(OrderEvents.CLEARED);
     }
 
     /**
-     * Валидация данных заказа
+     * Р’Р°Р»РёРґР°С†РёСЏ РґР°РЅРЅС‹С… Р·Р°РєР°Р·Р°
      */
     validateFields(): TBuyerErrors {
-        const errors: TBuyerErrors = {
-            payment: "",
-            email: "",
-            phone: "",
-            address: "",
-        };
+        const errors: TBuyerErrors = {};
 
         if (!this.dataBayer.payment) {
-            errors.payment = 'Не выбран способ оплаты';
+            errors.payment = 'РќРµ РІС‹Р±СЂР°РЅ СЃРїРѕСЃРѕР± РѕРїР»Р°С‚С‹';
         }
         if (!this.dataBayer.address) {
-            errors.address = 'Укажите адрес доставки';
+            errors.address = 'РЈРєР°Р¶РёС‚Рµ Р°РґСЂРµСЃ РґРѕСЃС‚Р°РІРєРё';
         }
         if (!this.dataBayer.email) {
-            errors.email = 'Укажите email';
+            errors.email = 'РЈРєР°Р¶РёС‚Рµ email';
         }
         if (!this.dataBayer.phone) {
-            errors.phone = 'Укажите номер телефона';
+            errors.phone = 'РЈРєР°Р¶РёС‚Рµ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°';
         }
 
         return errors;

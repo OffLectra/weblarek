@@ -1,7 +1,7 @@
 import { IApi, IProduct, IOrder, IOrderResponse } from '../../types';
 
 /**
- * Класс для работы с API web larek
+ * РљР»Р°СЃСЃ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ API web larek
  */
 export class WebLarekAPI {
     private api: IApi;
@@ -11,7 +11,7 @@ export class WebLarekAPI {
     }
 
     /**
-     * Получить список всех товаров с сервера
+     * РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РІСЃРµС… С‚РѕРІР°СЂРѕРІ СЃ СЃРµСЂРІРµСЂР°
      */
     async getProducts(): Promise<IProduct[]> {
         const response = await this.api.get<{ items: IProduct[] }>('/product');
@@ -19,7 +19,7 @@ export class WebLarekAPI {
     }
 
     /**
-     * Отправить заказ на сервер
+     * РћС‚РїСЂР°РІРёС‚СЊ Р·Р°РєР°Р· РЅР° СЃРµСЂРІРµСЂ
      */
     async postOrder(order: IOrder): Promise<IOrderResponse> {
         const rawResult = await this.api.post<IOrderResponse>('/order', order);

@@ -7,7 +7,7 @@ export interface IApi {
 
 
 /**
- * Интерфейс товара
+ * РРЅС‚РµСЂС„РµР№СЃ С‚РѕРІР°СЂР°
  */
 export interface IProduct {
     id: string;
@@ -19,12 +19,12 @@ export interface IProduct {
 }
 
 /**
- * Тип оплаты
+ * РўРёРї РѕРїР»Р°С‚С‹
  */
 export type TPayment = 'card' | 'cash' | null ;
 
 /**
- * Интерфейс покупателя
+ * РРЅС‚РµСЂС„РµР№СЃ РїРѕРєСѓРїР°С‚РµР»СЏ
  */
 export interface IBuyer {
     payment: TPayment;
@@ -34,8 +34,8 @@ export interface IBuyer {
 }
 
 /**
- * Интерфейс заказа
- * Для отправки на сервер
+ * РРЅС‚РµСЂС„РµР№СЃ Р·Р°РєР°Р·Р°
+ * Р”Р»СЏ РѕС‚РїСЂР°РІРєРё РЅР° СЃРµСЂРІРµСЂ
  */
 export interface IOrder extends IBuyer {
     total: number;
@@ -43,7 +43,7 @@ export interface IOrder extends IBuyer {
 }
 
 /**
- * Интерфейс ответа от сервера при успешном создании заказа
+ * РРЅС‚РµСЂС„РµР№СЃ РѕС‚РІРµС‚Р° РѕС‚ СЃРµСЂРІРµСЂР° РїСЂРё СѓСЃРїРµС€РЅРѕРј СЃРѕР·РґР°РЅРёРё Р·Р°РєР°Р·Р°
  */
 export interface IOrderResponse {
     id: string;

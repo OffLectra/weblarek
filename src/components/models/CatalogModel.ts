@@ -1,42 +1,56 @@
 import { IProduct } from '../../types';
+import { EventEmitter } from '../base/Events';
+
+enum CatalogEvents {
+    ITEMS_CHANGED = 'catalog:items-changed',
+    SELECTED_PRODUCT_CHANGED = 'catalog:selected-product-changed'
+}
 
 /**
- * Модель каталога товаров
+ * РњРѕРґРµР»СЊ РєР°С‚Р°Р»РѕРіР° С‚РѕРІР°СЂРѕРІ
  */
 export class CatalogModel {
     protected _items: IProduct[] = [];
     protected _selectedProduct: IProduct | null = null;
 
-    /**
-     * Сохранить массив товаров
-     */
-    setItems(items: IProduct[]): void {
-        this._items = items;
+    protected events: EventEmitter;
+
+    constructor(events: EventEmitter) {
+        this.events = events;
     }
 
     /**
-     * Получить все товары
+     * РЎРѕС…СЂР°РЅРёС‚СЊ РјР°СЃСЃРёРІ С‚РѕРІР°СЂРѕРІ
+     */
+    setItems(items: IProduct[]): void {
+        this._items = items;
+        this.events.emit(CatalogEvents.ITEMS_CHANGED);
+    }
+
+    /**
+     * РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ С‚РѕРІР°СЂС‹
      */
     getItems(): IProduct[] {
         return this._items;
     }
 
     /**
-     * Получить товар по id
+     * РџРѕР»СѓС‡РёС‚СЊ С‚РѕРІР°СЂ РїРѕ id
      */
     getProductById(id: string): IProduct | undefined {
         return this._items.find(item => item.id === id);
     }
 
     /**
-     * Сохранить выбранный товар
+     * РЎРѕС…СЂР°РЅРёС‚СЊ РІС‹Р±СЂР°РЅРЅС‹Р№ С‚РѕРІР°СЂ
      */
     setSelectedProduct(product: IProduct): void {
         this._selectedProduct = product;
+        this.events.emit(CatalogEvents.SELECTED_PRODUCT_CHANGED);
     }
 
     /**
-     * Получить выбранный товар
+     * РџРѕР»СѓС‡РёС‚СЊ РІС‹Р±СЂР°РЅРЅС‹Р№ С‚РѕРІР°СЂ
      */
     getSelectedProduct(): IProduct | null {
         return this._selectedProduct;
